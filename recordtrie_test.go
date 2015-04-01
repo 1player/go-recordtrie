@@ -1,11 +1,9 @@
 package recordtrie
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"sort"
-	"strings"
 	"testing"
 )
 
@@ -146,37 +144,4 @@ func TestTrieLoadSave(t *testing.T) {
 	if len(v) != 1 || v[0] != "def" {
 		t.Errorf("RecordTrie.Save(): unexpected data")
 	}
-}
-
-func ExampleParse() {
-
-	// Input format is key;value1;value2;...
-	input := `
-		fruits;apple;pear;peach
-		animals;dog;cat;horse;fish
-	`
-
-	var records []Record
-
-	for _, line := range strings.Split(input, "\n") {
-		line = strings.TrimSpace(line)
-		parts := strings.Split(line, ";")
-
-		key := parts[0]
-		values := parts[1:]
-
-		// Build the flat list of records
-		for _, value := range values {
-			records = append(records, Record{key, value})
-		}
-	}
-
-	// Build the trie
-	trie := New(records)
-
-	fmt.Printf("%v\n", trie.Find("fruits"))
-	// [apple pear peach]
-
-	fmt.Printf("%v\n", trie.Find("foo"))
-	// []
 }
