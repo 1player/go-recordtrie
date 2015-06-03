@@ -51,14 +51,13 @@ func NewFromFile(path string) (r *RecordTrie, err error) {
 		}
 	}()
 
-	t := marisa.NewTrie()
-	runtime.SetFinalizer(&t, func(t *marisa.Trie) {
-		marisa.DeleteTrie(*t)
+	r = &RecordTrie{
+		t: marisa.NewTrie(),
+	}
+	runtime.SetFinalizer(r, func(r *RecordTrie) {
+		marisa.DeleteTrie(r.t)
 	})
 
-	r = &RecordTrie{
-		t: t,
-	}
 	r.t.Mmap(path)
 
 	return
