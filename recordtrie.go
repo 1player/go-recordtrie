@@ -10,6 +10,7 @@ package recordtrie
 import (
 	"fmt"
 	"github.com/1player/go-marisa"
+	"runtime"
 	"strings"
 )
 
@@ -30,8 +31,13 @@ const KV_SEPARATOR = "\xFF"
 
 // Create a new RecordTrie from a list of Records
 func New(records []Record) *RecordTrie {
+	t := marisa.NewTrie()
+	runtime.SetFinalizer(&t, func(t *marisa.Trie) {
+		marisa.DeleteTrie(*t)
+	})
+	
 	r := &RecordTrie{
-		t: marisa.NewTrie(),
+		t: t,
 	}
 	r.build(records)
 
@@ -46,8 +52,13 @@ func NewFromFile(path string) (r *RecordTrie, err error) {
 		}
 	}()
 
+	t := marisa.NewTrie()
+	runtime.SetFinalizer(&t, func(t *marisa.Trie) {
+		marisa.DeleteTrie(*t)
+	})
+
 	r = &RecordTrie{
-		t: marisa.NewTrie(),
+		t: t,
 	}
 	r.t.Mmap(path)
 
@@ -68,6 +79,9 @@ func splitTrieKey(trieKey string) (string, string) {
 
 func (r *RecordTrie) build(records []Record) {
 	ks := marisa.NewKeyset()
+	runtime.SetFinalizer(&ks, func(ks *marisa.Keyset) {
+		marisa.DeleteKeyset(*ks)
+	})
 
 	for _, record := range records {
 		trieKey := buildTrieKey(record.Key, record.Value)
@@ -81,6 +95,10 @@ func (r *RecordTrie) build(records []Record) {
 // Stop iterating if iterFunc returns false
 func (r *RecordTrie) iter(query string, iterFunc func(k, v string) bool) {
 	a := marisa.NewAgent()
+	runtime.SetFinalizer(&a, func(a *marisa.Agent) {
+		marisa.DeleteAgent(*a)
+	})
+	
 	a.SetQueryString(query)
 
 	for r.t.PredictiveSearch(a) {
