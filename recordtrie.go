@@ -31,14 +31,13 @@ const KV_SEPARATOR = "\xFF"
 
 // Create a new RecordTrie from a list of Records
 func New(records []Record) *RecordTrie {
-	t := marisa.NewTrie()
-	runtime.SetFinalizer(&t, func(t *marisa.Trie) {
-		marisa.DeleteTrie(*t)
-	})
-	
 	r := &RecordTrie{
-		t: t,
+		t: marisa.NewTrie(),
 	}
+	runtime.SetFinalizer(r, func(r *RecordTrie) {
+		marisa.DeleteTrie(r.t)
+	})
+
 	r.build(records)
 
 	return r
